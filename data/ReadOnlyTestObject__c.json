@@ -1,0 +1,22 @@
+{
+    "records": [
+        {
+            "attributes": {
+                "type": "ReadOnlyTestObject__c",
+                "referenceId": "ReadOnlyTestObject__cRef1"
+            }
+        },
+        {
+            "attributes": {
+                "type": "ReadOnlyTestObject__c",
+                "referenceId": "ReadOnlyTestObject__cRef2"
+            }
+        },
+        {
+            "attributes": {
+                "type": "ReadOnlyTestObject__c",
+                "referenceId": "ReadOnlyTestObject__cRef3"
+            }
+        }
+    ]
+}

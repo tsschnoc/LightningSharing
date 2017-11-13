@@ -28,6 +28,7 @@
   </types>
   <types>
     <name>QuickAction</name>
+    <members>PrivateTestObject__c.Sharing</members>
     <members>ReadOnlyTestObject__c.Sharing</members>
   </types>
   <types>
@@ -35,5 +36,5 @@
     <members>PrivateTestObject__c</members>
     <members>ReadOnlyTestObject__c</members>
   </types>
-  <version>39.0</version>
+  <version>41.0</version>
 </Package>

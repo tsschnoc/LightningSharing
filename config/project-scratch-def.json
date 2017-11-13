@@ -1,0 +1,7 @@
+{
+  "edition": "Developer",
+  "hasSampleData" : true,
+  "orgPreferences" : {
+    "s1DesktopEnabled" : true
+  }
+}

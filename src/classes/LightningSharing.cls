@@ -59,6 +59,17 @@ global with sharing class LightningSharing {
 		}
 		system.debug('doing perm upsert');
 
+		// special handling for role => groups
+		if (UserOrGroupID.getSobjectType()==Schema.UserRole.SObjectType){
+			//it's a role...find the matching group?
+			list<group> matchingGroups = [select id, name, type from group where RelatedId =: UserOrGroupID and type = 'Role'];
+			if (matchingGroups.size()>1){
+				throw new AuraHandledException('There are multiple groups for that role');
+			}
+			UserOrGroupID = matchingGroups[0].Id;
+		}
+
+
 		string query = buildQuery(recordId);
 		query = query + ' and UserOrGroupID =\''+String.escapeSingleQuotes(string.valueOf(UserOrGroupID))+'\'';
 		system.debug(query);
@@ -132,8 +143,8 @@ global with sharing class LightningSharing {
 			}
 		}
 
-
-		string sosl = 'FIND \'*' + searchString + '*\' IN NAME FIELDS RETURNING ' + getReturning(objectType) ;
+		// limit rows returned for performance reasons
+		string sosl = 'FIND \'*' + searchString + '*\' IN NAME FIELDS RETURNING ' + getReturning(objectType) + ' limit 500';
 		list<list<sobject>> results = search.query(sosl);
 
 		list<sobject> output = new list<sobject>();
@@ -186,6 +197,7 @@ global static string getSharings(id recordId){
 	list<sharingHolder> output = new list<sharingHolder>();
 
 	set<id> groupAndUserIDs = new set<id>();
+	set<id> RoleIds = new set<id>();
 
 	for (sobject so:results){
 		sharingHolder sh = new sharingHolder();
@@ -206,7 +218,13 @@ global static string getSharings(id recordId){
 			throw new AuraHandledException('You do not have the required permissions for this action');
 		}
 	map<id, user> UserMap = new map<id, user>([select Name, UserType from User where id in: groupAndUserIDs]);
-	map<id, group> GroupMap = new map<id, group>([select Name, Type from Group where id in: groupAndUserIDs]);
+	map<id, group> GroupMap = new map<id, group>([select Name, Type, RelatedId from Group where id in: groupAndUserIDs]);
+	for (group g:GroupMap.values()){
+		if (g.RelatedId != null){
+			RoleIds.add(g.RelatedId);
+		}
+	}
+	map<id, UserRole> RoleMap = new map<id, userrole>([select Name from UserRole where id in: RoleIDs]);
 
 	for (sharingHolder sh:output){
 		if (UserMap.get(sh.UserOrGroupID)!=null){
@@ -218,6 +236,10 @@ global static string getSharings(id recordId){
 				sh.UserOrGroupType = 'Group';
 				sh.SubType = GroupMap.get(sh.UserOrGroupID).Type;
 				sh.UserOrGroupName = GroupMap.get(sh.UserOrGroupID).Name;
+				//special handling for roles
+				if (sh.SubType.contains('Role')){
+					sh.UserOrGroupName = RoleMap.get(GroupMap.get(sh.UserOrGroupID).RelatedId).Name;
+				}
 			}
 		}
 
