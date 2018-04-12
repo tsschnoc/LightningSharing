@@ -104,8 +104,8 @@
 								<lightning:layoutItem padding="around-small" flexibility="grow">
 									<lightning:input aura:id="search" name="for" value="{!v.searchString}" label="For" type="search" onchange="{!c.search}" placeholder="type at least 3 characters to see results"
 									/>
-									<aura:if isTrue="{!v.results.length >= 500 }">
-										Your search found more than 500 results. Keep typing to make it more specific.
+									<aura:if isTrue="{!v.results.length >= 199 }">
+										Your search found more than 200 results. Keep typing to make it more specific.
 									</aura:if>
 								</lightning:layoutItem>
 							</lightning:layout>

@@ -159,7 +159,7 @@ global with sharing class LightningSharing {
 		}
 
 		// limit rows returned for performance reasons
-		string sosl = 'FIND \'*' + searchString + '*\' IN NAME FIELDS RETURNING ' + getReturning(objectType) + ' limit 500';
+		string sosl = 'FIND \'*' + searchString + '*\' IN NAME FIELDS RETURNING ' + getReturning(objectType) + ' limit 200';
 		list<list<sobject>> results = search.query(sosl);
 
 		list<sobject> output = new list<sobject>();

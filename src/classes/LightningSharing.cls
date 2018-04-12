@@ -30,22 +30,12 @@ global with sharing class LightningSharing {
 	@AuraEnabled
 	global static boolean canIEditPerms(id recordId){
 		try {
-			//if you're the owner, you're cool
-			string query = 'select ownerId from ' + objectTypeFromId(recordId) + ' where id = \'' + String.escapeSingleQuotes(string.valueOf(recordId)) + '\'';
-			sobject o = database.query(query);
-			if (o.get('ownerId') == userInfo.getUserID()){
-				system.debug('edit allowed because owner');
-				return true;
-			}
-
-			//if you have modify allData, you're also cool
-			list<PermissionSetAssignment> modifiers = [SELECT AssigneeId FROM PermissionSetAssignment WHERE PermissionSet.PermissionsModifyAllData = true];
-			for (PermissionSetAssignment psa:modifiers){
-				if (psa.AssigneeId == userInfo.getUserID()){
-					system.debug('edit allowed because admin');
-					return true;
-				}
-			}
+            String query = 'SELECT RecordId, HasDeleteAccess, HasAllAccess FROM UserRecordAccess WHERE RecordId = \'' + String.escapeSingleQuotes(string.valueOf(recordId)) + '\' AND UserId = \'' + UserInfo.getUserId() + '\'';
+            sObject o = Database.query(query);
+            if ((Boolean)o.get('HasDeleteAccess') || (Boolean)o.get('HasAllAccess')){
+                System.Debug('edit allowed because user has full acesss or modify all permissions');
+                return true;
+            }
 		} catch (system.queryException e){
 			//it's possible you can't even see that record and the queries are null!
 			return false;
@@ -169,7 +159,7 @@ global with sharing class LightningSharing {
 		}
 
 		// limit rows returned for performance reasons
-		string sosl = 'FIND \'*' + searchString + '*\' IN NAME FIELDS RETURNING ' + getReturning(objectType) + ' limit 500';
+		string sosl = 'FIND \'*' + searchString + '*\' IN NAME FIELDS RETURNING ' + getReturning(objectType) + ' limit 200';
 		list<list<sobject>> results = search.query(sosl);
 
 		list<sobject> output = new list<sobject>();
